@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TK Home Tuition Jaipur | Smart Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .panel { display: none; }
+        .active { display: block; }
+        .tk-blue { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); }
+        .nav-active { color: #1e40af; border-bottom: 3px solid #1e40af; font-weight: bold; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans pb-20">
+
+    <nav class="bg-white shadow-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <div class="font-black text-2xl text-blue-800 italic tracking-tighter">TK HOME</div>
+        <div class="flex items-center gap-4">
+            <div class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-[10px] font-black shadow-sm">
+                <i class="fas fa-coins mr-1"></i> <span id="top-coin-balance">550</span>
+            </div>
+            <button onclick="showTab('admin')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold">ADMIN</button>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto p-4">
+
+        <div id="tab-home" class="panel active space-y-6">
+            <div class="tk-blue text-white p-10 rounded-3xl text-center shadow-2xl">
+                <h1 class="text-3xl font-black mb-2 uppercase italic">Jaipur's Smart Tuition</h1>
+                <p class="opacity-80 text-sm">Find Tutors within 5KM | Earn TK Coins | Live GPS</p>
+                <button onclick="scrollToDiscovery()" class="mt-6 bg-yellow-400 text-blue-900 px-8 py-2 rounded-full font-black text-sm">GET FREE DEMO</button>
+            </div>
+
+            <div id="discovery-section" class="bg-white p-6 rounded-3xl shadow-xl border">
+                <h2 class="text-lg font-bold mb-4 italic text-blue-800">1. Register for Demo</h2>
+                <div class="space-y-4">
+                    <input type="text" id="stu-name" placeholder="Student Name" class="w-full p-4 bg-gray-50 rounded-2xl border">
+                    <div class="flex gap-2">
+                        <input type="text" id="stu-slot" placeholder="Time Slot (e.g. 5 PM)" class="flex-1 p-4 bg-gray-50 rounded-2xl border">
+                        <button onclick="detectLocation()" class="bg-blue-100 text-blue-700 px-4 rounded-2xl text-[10px] font-bold"><i class="fas fa-map-marker-alt"></i> LOCATE</button>
+                    </div>
+                    <button onclick="findNearbyTeachers()" class="w-full bg-blue-700 text-white py-4 rounded-2xl font-black shadow-lg">SHOW TEACHERS NEAR ME</button>
+                </div>
+
+                <div id="tutor-results" class="mt-8 hidden space-y-4 pt-6 border-t">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase italic">Teachers in 5KM Range:</h3>
+                    <div id="tutor-list" class="space-y-3">
+                        <div class="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center transition hover:border-blue-400">
+                            <div>
+                                <p class="font-bold">Anil Sharma (Maths)</p>
+                                <p class="text-[10px] text-yellow-500">★★★★★ 5.0 Rating</p>
+                                <p class="text-[10px] text-gray-400 font-bold tracking-tight italic">2.3 KM AWAY</p>
+                            </div>
+                            <button onclick="requestDemo('Anil Sharma')" class="bg-green-600 text-white px-4 py-2 rounded-xl text-[10px] font-black italic">REQUEST DEMO</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-teacher-reg" class="panel space-y-6">
+            <div class="bg-white p-8 rounded-3xl shadow-xl border">
+                <h2 class="text-2xl font-black mb-6 text-blue-900 italic">TEACHER ONBOARDING</h2>
+                <div class="space-y-4">
+                    <input type="text" id="t-name" placeholder="Full Name" class="w-full p-4 border rounded-2xl">
+                    <input type="number" id="t-phone" placeholder="WhatsApp Number" class="w-full p-4 border rounded-2xl">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="border-2 border-dashed border-gray-200 p-4 rounded-2xl text-center">
+                            <p class="text-[9px] font-bold mb-2 uppercase text-gray-400">Resume Image</p>
+                            <input type="file" id="t-resume" class="text-[8px]">
+                        </div>
+                        <div class="border-2 border-dashed border-gray-200 p-4 rounded-2xl text-center">
+                            <p class="text-[9px] font-bold mb-2 uppercase text-gray-400">1-Min Demo Video</p>
+                            <input type="file" id="t-video" class="text-[8px]">
+                        </div>
+                    </div>
+                    <button onclick="saveTeacherToDB()" class="w-full bg-blue-800 text-white py-4 rounded-2xl font-black">SUBMIT PROFILE</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-rewards" class="panel space-y-6 text-center">
+            <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-10 rounded-3xl text-white shadow-xl">
+                <p class="text-xs font-black uppercase tracking-widest opacity-80">My TK Wallet</p>
+                <h2 class="text-6xl font-black my-2" id="coin-balance">550</h2>
+                <p class="text-xs font-bold italic">Keep learning, keep earning!</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-dashed border-blue-200">
+                <h3 class="font-black text-blue-800 italic mb-2">Reverse Teaching (Idea 2)</h3>
+                <p class="text-[10px] text-gray-400 mb-4 uppercase font-bold tracking-widest">Earn 50 Coins per Video</p>
+                <input type="file" accept="video/*" class="w-full text-xs">
+                <button onclick="uploadReverseVideo()" class="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl font-bold">SUBMIT TEACHING VIDEO</button>
+            </div>
+        </div>
+
+        <div id="tab-admin" class="panel space-y-6">
+            <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-2xl">
+                <h2 class="text-2xl font-black italic text-red-500">TINKAL'S COMMAND CENTER</h2>
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-white/10 p-4 rounded-2xl border border-white/20">
+                        <p class="text-[10px] opacity-60">ADMIN PROFIT (THIS MONTH)</p>
+                        <p class="text-2xl font-black text-yellow-400" id="total-profit-display">₹0</p>
+                    </div>
+                    <div class="bg-white/10 p-4 rounded-2xl border border-white/20 text-right">
+                        <p class="text-[10px] opacity-60">ACTIVE TEACHERS</p>
+                        <p class="text-2xl font-black text-blue-400">12</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-xl border overflow-hidden">
+                <div class="bg-gray-800 text-white p-4 font-black text-xs italic tracking-widest uppercase">Fee & Commission Manager</div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-[11px]">
+                        <thead>
+                            <tr class="bg-gray-100 border-b">
+                                <th class="p-4">Student/Teacher</th>
+                                <th class="p-4 text-blue-600">Admin (Commission)</th>
+                                <th class="p-4">Teacher Share</th>
+                                <th class="p-4">WhatsApp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finance-body" class="divide-y italic">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 shadow-2xl z-50">
+        <button onclick="showTab('home')" class="nav-btn text-blue-600 flex flex-col items-center"><i class="fas fa-search"></i><span class="text-[10px]">Find</span></button>
+        <button onclick="showTab('teacher-reg')" class="nav-btn text-gray-400 flex flex-col items-center"><i class="fas fa-user-plus"></i><span class="text-[10px]">Tutor</span></button>
+        <button onclick="showTab('rewards')" class="nav-btn text-gray-400 flex flex-col items-center"><i class="fas fa-gift"></i><span class="text-[10px]">Rewards</span></button>
+    </div>
+
+    <script>
+        let currentCoins = 550;
+        let revenueData = [
+            {student: "Rahul Bansal", teacher: "Sunita Mam", amount: 6000, month: 1}, // 25%
+            {student: "Aman Gupta", teacher: "Anil Sir", amount: 4000, month: 2}    // 5%
+        ];
+
+        function showTab(id) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('active');
+            
+            // UI Button Active Style
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-blue-600', 'text-gray-400'));
+        }
+
+        function scrollToDiscovery() {
+            document.getElementById('discovery-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function detectLocation() {
+            alert("Jaipur Live Location Detected! Lat: 26.9124, Long: 75.7873. Filtering Tutors in 5KM...");
+        }
+
+        function findNearbyTeachers() {
+            document.getElementById('tutor-results').classList.remove('hidden');
+            window.scrollBy(0, 300);
+        }
+
+        function requestDemo(tName) {
+            const slot = document.getElementById('stu-slot').value || "Anytime";
+            const msg = `Namaste! TK Home Tuition Jaipur se DEMO REQUEST: \n\nTeacher: ${tName}\nSlot: ${slot}\n\nKya aap free hain?`;
+            window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(msg)}`);
+        }
+
+        function uploadReverseVideo() {
+            alert("Video Uploading... Tinkal Bhai will review this!");
+            setTimeout(() => {
+                currentCoins += 50;
+                document.getElementById('coin-balance').innerText = currentCoins;
+                document.getElementById('top-coin-balance').innerText = currentCoins;
+                alert("Mubarak ho! +50 TK Coins added!");
+            }, 2000);
+        }
+
+        // Finance Logic (25% vs 5%)
+        function loadAdminFinance() {
+            const body = document.getElementById('finance-body');
+            let totalProfit = 0;
+            body.innerHTML = "";
+
+            revenueData.forEach(r => {
+                const commRate = r.month === 1 ? 0.25 : 0.05;
+                const adminCut = r.amount * commRate;
+                const teacherCut = r.amount - adminCut;
+                totalProfit += adminCut;
+
+                body.innerHTML += `
+                    <tr class="hover:bg-blue-50">
+                        <td class="p-4 font-bold text-gray-700">${r.student}<br><span class="text-[9px] text-gray-400 font-light">Tutor: ${r.teacher}</span></td>
+                        <td class="p-4 font-black text-blue-700">₹${adminCut} <span class="text-[8px] bg-blue-100 p-1 rounded font-bold">${r.month === 1 ? '25%' : '5%'}</span></td>
+                        <td class="p-4 font-bold text-gray-500">₹${teacherCut}</td>
+                        <td class="p-4"><button onclick="alert('Sending Invoice...')" class="text-green-500"><i class="fab fa-whatsapp text-lg"></i></button></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('total-profit-display').innerText = "₹" + totalProfit;
+        }
+
+        // Initial Load
+        loadAdminFinance();
+    </script>
+</body>
+</html>
