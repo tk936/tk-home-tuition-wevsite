@@ -3,131 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TK Home Tuition Jaipur | Smart Management System</title>
+    <title>TK Home Tuition | Jaipur's No.1 Edu-Tech</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .panel { display: none; }
+        .panel { display: none; transition: all 0.5s ease; }
         .active { display: block; }
-        .tk-blue { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); }
-        .nav-active { color: #1e40af; border-bottom: 3px solid #1e40af; font-weight: bold; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .tk-dark { background: #0f172a; }
+        .coin-glow { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #1e40af; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-slate-50 font-sans pb-20">
+<body class="bg-slate-100 font-sans pb-24">
 
-    <nav class="bg-white shadow-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-        <div class="font-black text-2xl text-blue-800 italic tracking-tighter">TK HOME</div>
-        <div class="flex items-center gap-4">
-            <div class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-[10px] font-black shadow-sm">
-                <i class="fas fa-coins mr-1"></i> <span id="top-coin-balance">550</span>
+    <nav class="tk-dark text-white p-4 sticky top-0 z-50 flex justify-between items-center shadow-2xl">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-600 p-2 rounded-lg text-white font-black italic">TK</div>
+            <h1 class="text-xl font-black italic tracking-tighter">HOME TUITION</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="bg-white/10 px-3 py-1 rounded-full flex items-center gap-2 coin-glow">
+                <i class="fas fa-coins text-yellow-400"></i>
+                <span id="nav-coins" class="font-black text-sm text-yellow-400">1250</span>
             </div>
-            <button onclick="showTab('admin')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold">ADMIN</button>
+            <button onclick="showTab('admin')" class="bg-red-600 text-[10px] font-bold px-3 py-1.5 rounded-md hover:bg-red-700">ADMIN</button>
         </div>
     </nav>
 
-    <div class="max-w-4xl mx-auto p-4">
+    <div class="max-w-4xl mx-auto p-4 space-y-6">
 
-        <div id="tab-home" class="panel active space-y-6">
-            <div class="tk-blue text-white p-10 rounded-3xl text-center shadow-2xl">
-                <h1 class="text-3xl font-black mb-2 uppercase italic">Jaipur's Smart Tuition</h1>
-                <p class="opacity-80 text-sm">Find Tutors within 5KM | Earn TK Coins | Live GPS</p>
-                <button onclick="scrollToDiscovery()" class="mt-6 bg-yellow-400 text-blue-900 px-8 py-2 rounded-full font-black text-sm">GET FREE DEMO</button>
+        <div id="tab-find" class="panel active space-y-6">
+            <div class="bg-blue-700 text-white p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
+                <div class="relative z-10">
+                    <h2 class="text-3xl font-black italic mb-2">Dhoondho Best Teacher!</h2>
+                    <p class="text-xs opacity-80 mb-6 uppercase tracking-widest font-bold">Location-Based Smart Matching</p>
+                    <div class="flex flex-col gap-3">
+                        <button onclick="detectLiveLoc()" class="w-full bg-white/20 border border-white/30 py-3 rounded-2xl flex items-center justify-center gap-2 font-bold hover:bg-white/30 transition">
+                            <i class="fas fa-location-arrow"></i> Detect My Area
+                        </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="f-class" class="bg-white text-gray-800 p-3 rounded-xl text-xs font-bold border-none outline-none">
+                                <option>Select Class</option>
+                                <option>1st - 5th</option>
+                                <option>6th - 10th</option>
+                                <option>11th - 12th</option>
+                            </select>
+                            <select id="f-sub" class="bg-white text-gray-800 p-3 rounded-xl text-xs font-bold border-none outline-none">
+                                <option>Subject</option>
+                                <option>Maths</option>
+                                <option>Science</option>
+                                <option>All Subjects</option>
+                            </select>
+                        </div>
+                        <button onclick="searchTutors()" class="bg-yellow-400 text-blue-900 py-4 rounded-2xl font-black uppercase text-sm shadow-xl hover:scale-105 transition">Show Nearby Tutors</button>
+                    </div>
+                </div>
+                <i class="fas fa-user-graduate absolute -right-4 -bottom-4 text-9xl opacity-10"></i>
             </div>
 
-            <div id="discovery-section" class="bg-white p-6 rounded-3xl shadow-xl border">
-                <h2 class="text-lg font-bold mb-4 italic text-blue-800">1. Register for Demo</h2>
-                <div class="space-y-4">
-                    <input type="text" id="stu-name" placeholder="Student Name" class="w-full p-4 bg-gray-50 rounded-2xl border">
-                    <div class="flex gap-2">
-                        <input type="text" id="stu-slot" placeholder="Time Slot (e.g. 5 PM)" class="flex-1 p-4 bg-gray-50 rounded-2xl border">
-                        <button onclick="detectLocation()" class="bg-blue-100 text-blue-700 px-4 rounded-2xl text-[10px] font-bold"><i class="fas fa-map-marker-alt"></i> LOCATE</button>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-trophy text-2xl text-yellow-500"></i>
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Jaipur Leaderboard</p>
+                        <p class="text-xs font-black">#1 Aryan Sharma (2450 TK)</p>
                     </div>
-                    <button onclick="findNearbyTeachers()" class="w-full bg-blue-700 text-white py-4 rounded-2xl font-black shadow-lg">SHOW TEACHERS NEAR ME</button>
                 </div>
+                <button class="text-blue-600 text-[10px] font-bold">VIEW ALL <i class="fas fa-arrow-right"></i></button>
+            </div>
 
-                <div id="tutor-results" class="mt-8 hidden space-y-4 pt-6 border-t">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase italic">Teachers in 5KM Range:</h3>
-                    <div id="tutor-list" class="space-y-3">
-                        <div class="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center transition hover:border-blue-400">
+            <div id="results" class="hidden space-y-4">
+                <h3 class="font-black text-gray-700 italic px-2">Verified Tutors in 5KM:</h3>
+                <div class="space-y-4" id="teacher-list">
+                    <div class="bg-white p-5 rounded-[2rem] shadow-md border-2 border-transparent hover:border-blue-500 transition relative">
+                        <span class="absolute top-4 right-4 bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter">Police Verified <i class="fas fa-check-circle"></i></span>
+                        <div class="flex gap-4">
+                            <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl font-black text-blue-600 shadow-inner">AS</div>
                             <div>
-                                <p class="font-bold">Anil Sharma (Maths)</p>
-                                <p class="text-[10px] text-yellow-500">★★★★★ 5.0 Rating</p>
-                                <p class="text-[10px] text-gray-400 font-bold tracking-tight italic">2.3 KM AWAY</p>
+                                <h4 class="font-black text-lg">Anil Sharma <span class="text-yellow-500 text-xs">★ 4.9</span></h4>
+                                <p class="text-xs text-gray-400 italic font-medium">B.Tech | 5 Years Exp.</p>
+                                <p class="text-[10px] text-green-600 font-black mt-2 uppercase tracking-widest"><i class="fas fa-map-marker-alt"></i> 1.8 KM (Mansarovar)</p>
                             </div>
-                            <button onclick="requestDemo('Anil Sharma')" class="bg-green-600 text-white px-4 py-2 rounded-xl text-[10px] font-black italic">REQUEST DEMO</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-4">
+                            <button class="bg-gray-100 text-gray-700 py-2 rounded-xl text-[10px] font-bold uppercase"><i class="fas fa-play"></i> Demo Video</button>
+                            <button onclick="requestDemo('Anil Sharma')" class="bg-blue-600 text-white py-2 rounded-xl text-[10px] font-bold uppercase shadow-lg">Request Match</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="tab-teacher-reg" class="panel space-y-6">
-            <div class="bg-white p-8 rounded-3xl shadow-xl border">
-                <h2 class="text-2xl font-black mb-6 text-blue-900 italic">TEACHER ONBOARDING</h2>
-                <div class="space-y-4">
-                    <input type="text" id="t-name" placeholder="Full Name" class="w-full p-4 border rounded-2xl">
-                    <input type="number" id="t-phone" placeholder="WhatsApp Number" class="w-full p-4 border rounded-2xl">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="border-2 border-dashed border-gray-200 p-4 rounded-2xl text-center">
-                            <p class="text-[9px] font-bold mb-2 uppercase text-gray-400">Resume Image</p>
-                            <input type="file" id="t-resume" class="text-[8px]">
-                        </div>
-                        <div class="border-2 border-dashed border-gray-200 p-4 rounded-2xl text-center">
-                            <p class="text-[9px] font-bold mb-2 uppercase text-gray-400">1-Min Demo Video</p>
-                            <input type="file" id="t-video" class="text-[8px]">
-                        </div>
+        <div id="tab-learn" class="panel space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-md">
+                <h4 class="font-black text-sm mb-4 italic flex items-center gap-2"><i class="fas fa-calendar-check text-green-500"></i> Study Consistency</h4>
+                <div class="flex gap-1 overflow-x-auto pb-2" id="heatmap">
                     </div>
-                    <button onclick="saveTeacherToDB()" class="w-full bg-blue-800 text-white py-4 rounded-2xl font-black">SUBMIT PROFILE</button>
-                </div>
+                <p class="text-[10px] text-gray-400 mt-2 font-bold italic underline">Keep it Green to win Surprise Gifts!</p>
             </div>
-        </div>
 
-        <div id="tab-rewards" class="panel space-y-6 text-center">
-            <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-10 rounded-3xl text-white shadow-xl">
-                <p class="text-xs font-black uppercase tracking-widest opacity-80">My TK Wallet</p>
-                <h2 class="text-6xl font-black my-2" id="coin-balance">550</h2>
-                <p class="text-xs font-bold italic">Keep learning, keep earning!</p>
-            </div>
-            
-            <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-dashed border-blue-200">
-                <h3 class="font-black text-blue-800 italic mb-2">Reverse Teaching (Idea 2)</h3>
-                <p class="text-[10px] text-gray-400 mb-4 uppercase font-bold tracking-widest">Earn 50 Coins per Video</p>
-                <input type="file" accept="video/*" class="w-full text-xs">
-                <button onclick="uploadReverseVideo()" class="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl font-bold">SUBMIT TEACHING VIDEO</button>
+            <div class="bg-gradient-to-br from-indigo-600 to-purple-700 p-8 rounded-[2.5rem] text-white shadow-xl relative">
+                <h3 class="text-2xl font-black italic mb-2 leading-tight">Video Feedback Challenge</h3>
+                <p class="text-xs opacity-80 mb-6">Aaj jo padha hai use 1 minute mein samjhao aur 100 Coins kamao!</p>
+                <input type="file" id="vid-upload" class="hidden">
+                <label for="vid-upload" class="bg-white text-indigo-700 px-8 py-4 rounded-2xl font-black shadow-lg cursor-pointer flex items-center justify-center gap-2 text-sm uppercase">
+                    <i class="fas fa-cloud-upload-alt text-lg"></i> Upload Video
+                </label>
             </div>
         </div>
 
         <div id="tab-admin" class="panel space-y-6">
-            <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-2xl">
-                <h2 class="text-2xl font-black italic text-red-500">TINKAL'S COMMAND CENTER</h2>
-                <div class="grid grid-cols-2 gap-4 mt-6">
-                    <div class="bg-white/10 p-4 rounded-2xl border border-white/20">
-                        <p class="text-[10px] opacity-60">ADMIN PROFIT (THIS MONTH)</p>
-                        <p class="text-2xl font-black text-yellow-400" id="total-profit-display">₹0</p>
-                    </div>
-                    <div class="bg-white/10 p-4 rounded-2xl border border-white/20 text-right">
-                        <p class="text-[10px] opacity-60">ACTIVE TEACHERS</p>
-                        <p class="text-2xl font-black text-blue-400">12</p>
-                    </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-6 rounded-3xl shadow-md border-l-8 border-blue-600">
+                    <p class="text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">TK Net Revenue</p>
+                    <p class="text-3xl font-black text-blue-800 italic" id="admin-rev">₹0</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-md border-l-8 border-red-500">
+                    <p class="text-[10px] font-black text-gray-400 uppercase mb-1 tracking-widest">Late Fees Due</p>
+                    <p class="text-3xl font-black text-red-600 italic">₹4,500</p>
                 </div>
             </div>
 
-            <div class="bg-white rounded-3xl shadow-xl border overflow-hidden">
-                <div class="bg-gray-800 text-white p-4 font-black text-xs italic tracking-widest uppercase">Fee & Commission Manager</div>
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border">
+                <div class="bg-slate-800 text-white p-4 font-black text-[10px] uppercase tracking-widest italic">Finance & Payout Center</div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-[11px]">
+                    <table class="w-full text-left text-[11px] border-collapse">
                         <thead>
-                            <tr class="bg-gray-100 border-b">
-                                <th class="p-4">Student/Teacher</th>
-                                <th class="p-4 text-blue-600">Admin (Commission)</th>
-                                <th class="p-4">Teacher Share</th>
-                                <th class="p-4">WhatsApp</th>
+                            <tr class="bg-gray-50 text-gray-400 uppercase font-black border-b">
+                                <th class="p-4">Student/Tutor</th>
+                                <th class="p-4">Month</th>
+                                <th class="p-4">Total Fee</th>
+                                <th class="p-4 text-blue-600">TK Profit</th>
+                                <th class="p-4 text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="finance-body" class="divide-y italic">
+                        <tbody id="finance-table" class="divide-y italic font-medium">
                             </tbody>
                     </table>
                 </div>
@@ -136,82 +148,102 @@
 
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 shadow-2xl z-50">
-        <button onclick="showTab('home')" class="nav-btn text-blue-600 flex flex-col items-center"><i class="fas fa-search"></i><span class="text-[10px]">Find</span></button>
-        <button onclick="showTab('teacher-reg')" class="nav-btn text-gray-400 flex flex-col items-center"><i class="fas fa-user-plus"></i><span class="text-[10px]">Tutor</span></button>
-        <button onclick="showTab('rewards')" class="nav-btn text-gray-400 flex flex-col items-center"><i class="fas fa-gift"></i><span class="text-[10px]">Rewards</span></button>
+    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t flex justify-around items-center p-3 shadow-2xl z-[100]">
+        <button onclick="showTab('find')" class="flex flex-col items-center gap-1 text-blue-600" id="btn-find">
+            <i class="fas fa-search text-xl"></i><span class="text-[9px] font-black uppercase">Search</span>
+        </button>
+        <button onclick="showTab('learn')" class="flex flex-col items-center gap-1 text-gray-400" id="btn-learn">
+            <i class="fas fa-graduation-cap text-xl"></i><span class="text-[9px] font-black uppercase">Academy</span>
+        </button>
+        <button onclick="showTab('gift')" class="flex flex-col items-center gap-1 text-gray-400" id="btn-gift">
+            <i class="fas fa-gift text-xl"></i><span class="text-[9px] font-black uppercase">Store</span>
+        </button>
+        <button onclick="showTab('profile')" class="flex flex-col items-center gap-1 text-gray-400" id="btn-profile">
+            <i class="fas fa-user-circle text-xl"></i><span class="text-[9px] font-black uppercase">Me</span>
+        </button>
     </div>
 
     <script>
-        let currentCoins = 550;
-        let revenueData = [
-            {student: "Rahul Bansal", teacher: "Sunita Mam", amount: 6000, month: 1}, // 25%
-            {student: "Aman Gupta", teacher: "Anil Sir", amount: 4000, month: 2}    // 5%
+        // Data State
+        let revenueRecords = [
+            { name: "Rahul Bansal", tutor: "Sunita M.", fee: 5000, month: 1 }, // 25%
+            { name: "Aman Gupta", tutor: "Anil S.", fee: 4000, month: 3 },    // 5%
+            { name: "Sia Jain", tutor: "Rahul P.", fee: 6000, month: 1 }      // 25%
         ];
 
+        // 1. Tab Management Logic
         function showTab(id) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
             
-            // UI Button Active Style
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-blue-600', 'text-gray-400'));
+            // Bottom Nav Colors
+            document.querySelectorAll('.fixed button').forEach(b => b.classList.replace('text-blue-600', 'text-gray-400'));
+            document.getElementById('btn-' + id).classList.replace('text-gray-400', 'text-blue-600');
+            
+            if(id === 'admin') loadFinance();
         }
 
-        function scrollToDiscovery() {
-            document.getElementById('discovery-section').scrollIntoView({ behavior: 'smooth' });
+        // 2. Heatmap Generator (Idea 4)
+        function generateHeatmap() {
+            const heatmap = document.getElementById('heatmap');
+            for(let i=0; i<30; i++) {
+                const day = document.createElement('div');
+                const isGreen = Math.random() > 0.3;
+                day.className = `w-6 h-6 rounded-md flex-shrink-0 ${isGreen ? 'bg-green-500' : 'bg-red-300'} shadow-sm`;
+                heatmap.appendChild(day);
+            }
         }
 
-        function detectLocation() {
-            alert("Jaipur Live Location Detected! Lat: 26.9124, Long: 75.7873. Filtering Tutors in 5KM...");
-        }
+        // 3. Finance & Profit Calculator (25%/5% Model)
+        function loadFinance() {
+            const table = document.getElementById('finance-table');
+            let totalAdminRev = 0;
+            table.innerHTML = "";
 
-        function findNearbyTeachers() {
-            document.getElementById('tutor-results').classList.remove('hidden');
-            window.scrollBy(0, 300);
-        }
+            revenueRecords.forEach(r => {
+                const rate = r.month === 1 ? 0.25 : 0.05;
+                const adminProfit = r.fee * rate;
+                totalAdminRev += adminProfit;
 
-        function requestDemo(tName) {
-            const slot = document.getElementById('stu-slot').value || "Anytime";
-            const msg = `Namaste! TK Home Tuition Jaipur se DEMO REQUEST: \n\nTeacher: ${tName}\nSlot: ${slot}\n\nKya aap free hain?`;
-            window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(msg)}`);
-        }
-
-        function uploadReverseVideo() {
-            alert("Video Uploading... Tinkal Bhai will review this!");
-            setTimeout(() => {
-                currentCoins += 50;
-                document.getElementById('coin-balance').innerText = currentCoins;
-                document.getElementById('top-coin-balance').innerText = currentCoins;
-                alert("Mubarak ho! +50 TK Coins added!");
-            }, 2000);
-        }
-
-        // Finance Logic (25% vs 5%)
-        function loadAdminFinance() {
-            const body = document.getElementById('finance-body');
-            let totalProfit = 0;
-            body.innerHTML = "";
-
-            revenueData.forEach(r => {
-                const commRate = r.month === 1 ? 0.25 : 0.05;
-                const adminCut = r.amount * commRate;
-                const teacherCut = r.amount - adminCut;
-                totalProfit += adminCut;
-
-                body.innerHTML += `
+                table.innerHTML += `
                     <tr class="hover:bg-blue-50">
-                        <td class="p-4 font-bold text-gray-700">${r.student}<br><span class="text-[9px] text-gray-400 font-light">Tutor: ${r.teacher}</span></td>
-                        <td class="p-4 font-black text-blue-700">₹${adminCut} <span class="text-[8px] bg-blue-100 p-1 rounded font-bold">${r.month === 1 ? '25%' : '5%'}</span></td>
-                        <td class="p-4 font-bold text-gray-500">₹${teacherCut}</td>
-                        <td class="p-4"><button onclick="alert('Sending Invoice...')" class="text-green-500"><i class="fab fa-whatsapp text-lg"></i></button></td>
+                        <td class="p-4">
+                            <p class="font-black text-gray-800">${r.name}</p>
+                            <p class="text-[8px] text-gray-400 uppercase font-bold tracking-tight">Tutor: ${r.tutor}</p>
+                        </td>
+                        <td class="p-4">
+                            <span class="${r.month === 1 ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500'} px-2 py-0.5 rounded-full font-black text-[9px]">
+                                ${r.month === 1 ? 'NEW Match' : 'Month ' + r.month}
+                            </span>
+                        </td>
+                        <td class="p-4 font-black text-gray-600 text-xs">₹${r.fee}</td>
+                        <td class="p-4 font-black text-blue-600 text-xs">₹${adminProfit} <span class="text-[8px] opacity-40">(${rate*100}%)</span></td>
+                        <td class="p-4 text-center">
+                            <button onclick="alert('WhatsApp Alert Sent!')" class="text-green-500 hover:scale-110 transition"><i class="fab fa-whatsapp text-lg"></i></button>
+                        </td>
                     </tr>
                 `;
             });
-            document.getElementById('total-profit-display').innerText = "₹" + totalProfit;
+            document.getElementById('admin-rev').innerText = "₹" + totalAdminRev;
         }
 
-        // Initial Load
-        loadAdminFinance();
+        // 4. Discovery Functions
+        function detectLiveLoc() {
+            alert("Jaipur Live Geofence Activated! Detecting Area: Mansarovar Sector 5...");
+        }
+
+        function searchTutors() {
+            document.getElementById('results').classList.remove('hidden');
+            window.scrollBy({ top: 300, behavior: 'smooth' });
+        }
+
+        function requestDemo(name) {
+            const msg = `Namaste! TK Home Tuition Jaipur se Match Request: \n\nStudent: Guest\nTeacher: ${name}\nArea: Jaipur\n\nKripya confirm karein!`;
+            window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(msg)}`);
+        }
+
+        // Initial Runs
+        generateHeatmap();
     </script>
 </body>
 </html>
